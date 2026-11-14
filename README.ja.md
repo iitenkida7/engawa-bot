@@ -50,7 +50,8 @@ make up      # ビルドしてバックグラウンドで起動（落ちても�
 make logs    # ログを見る
 ```
 
-`DELIVERY=local`（既定）の場合、会議ごとに `./data/meetings/<日付 時刻 部屋>/` に保存します。
+`DELIVERY=local`（既定）の場合、会議ごとに `./data/meetings/<日付 時刻 部屋 (参加者)>/` に保存します
+（例: `2026-11-14 1430 会議室1 (アリス、ボブ)`。参加者は 4 人まで名前を並べ、それ以上は「他 N 名」）。
 
 ### Google ドライブに届ける
 
@@ -62,7 +63,7 @@ make logs    # ログを見る
 4. `config/recipients.example.json` を `config/recipients.json` にコピーし、engawa の表示名とメールアドレスの対応を書きます。
    `ALLOWED_EMAIL_DOMAINS` には自社のドメインを設定します。これ以外のアドレスには絶対に共有しません。
 
-会議は `<共有ドライブ>/<YYYY-MM>/<YYYY-MM-DD HHMM 部屋>/` に、録画・要約（Google ドキュメント）・
+会議は `<共有ドライブ>/<YYYY-MM>/<YYYY-MM-DD HHMM 部屋 (参加者)>/` に、録画・要約（Google ドキュメント）・
 文字起こし（Google ドキュメント）として保存し、会議フォルダを**呼んだ人だけ**に編集権限で共有します。
 ドライブへの保存に失敗したときはローカルに残すので、記録が消えることはありません。
 

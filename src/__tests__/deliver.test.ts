@@ -52,7 +52,7 @@ describe('deliverLocal', () => {
     const m = await meetingWithVideo();
     const out = await mkdtemp(join(tmpdir(), 'engawa-bot-out-'));
     const dir = await deliverLocal(m, summary, out, o);
-    expect(dir).toBe(join(out, '2026-11-14 0530 Room A'));
+    expect(dir).toBe(join(out, '2026-11-14 0530 Room A (Alice, Bob)'));
     expect((await readdir(dir)).sort()).toEqual(['Recording.mp4', 'Summary.txt', 'Transcript.txt']);
     expect(await exists(m.videoPath!)).toBe(false);
     expect(await Bun.file(join(dir, 'Transcript.txt')).text()).toContain('Alice: hi');
@@ -73,7 +73,7 @@ describe('deliverDrive', () => {
     await deliverDrive(m, summary, deps(drive), o);
     expect(log).toEqual([
       'ensure 2026-11',
-      'folder 2026-11-14 0530 Room A',
+      'folder 2026-11-14 0530 Room A (Alice, Bob)',
       'upload Recording.mp4 video/mp4',
       'doc Transcript: [05:30:00] Alice: hi',
       'doc Summary: Meeting notes: Room A',

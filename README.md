@@ -53,7 +53,8 @@ make up      # build and start in the background (restarts automatically)
 make logs    # follow the log
 ```
 
-With `DELIVERY=local` (the default) each meeting lands in `./data/meetings/<date time room>/`.
+With `DELIVERY=local` (the default) each meeting lands in `./data/meetings/<date time room (participants)>/`, e.g.
+`2026-11-14 1430 Meeting room 1 (Alice, Bob)` (up to four names, then a count).
 
 ### Google Drive delivery
 
@@ -67,7 +68,7 @@ With `DELIVERY=local` (the default) each meeting lands in `./data/meetings/<date
    email addresses. Set `ALLOWED_EMAIL_DOMAINS` to your organization's domain(s): the bot never shares
    with an address outside them.
 
-Meetings are filed as `<shared drive>/<YYYY-MM>/<YYYY-MM-DD HHMM room>/` with the recording, a summary
+Meetings are filed as `<shared drive>/<YYYY-MM>/<YYYY-MM-DD HHMM room (participants)>/` with the recording, a summary
 doc and a transcript doc, and the meeting folder is shared (editor) with the caller only. If Drive fails
 the meeting is kept locally instead, so nothing is lost.
 

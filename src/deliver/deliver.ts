@@ -37,7 +37,7 @@ export async function deliverLocal(
   o: DeliverOptions,
 ): Promise<string> {
   const names = FILE_NAMES[o.lang];
-  const out = join(dir, folderName(m, o.tz));
+  const out = join(dir, folderName(m, o));
   await mkdir(out, { recursive: true });
   if (m.videoPath) await rename(m.videoPath, join(out, `${names.video}${extname(m.videoPath)}`));
   await Bun.write(join(out, `${names.summary}.txt`), summaryDocText(m, s, o));
@@ -54,7 +54,7 @@ export async function deliverDrive(
   const names = FILE_NAMES[o.lang];
   const { drive } = deps;
   const month = await drive.ensureFolder(monthOf(m.startedAt, o.tz), deps.rootFolderId);
-  const folder = await drive.createFolder(folderName(m, o.tz), month.id);
+  const folder = await drive.createFolder(folderName(m, o), month.id);
   const video = m.videoPath
     ? await drive.uploadFile(
         m.videoPath,

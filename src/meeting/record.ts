@@ -39,9 +39,23 @@ export const monthOf = (ms: number, tz: string) => stamp(ms, tz).slice(0, 7);
 export const timeOf = (ms: number, tz: string) => stamp(ms, tz).slice(11, 16);
 const clockOf = (ms: number, tz: string) => stamp(ms, tz).slice(11, 19);
 
-// Folder name for one meeting, e.g. "2026-11-14 1430 Meeting room A".
-export function folderName(m: MeetingRecord, tz: string): string {
-  const name = `${dateOf(m.startedAt, tz)} ${timeOf(m.startedAt, tz).replace(':', '')} ${m.roomName ?? m.callerName}`;
+// Names listed in a folder name before the rest are summarized as a count.
+const FOLDER_MAX_NAMES = 4;
+
+// "Alice, Bob" / "Alice、Bob" — with "+2" / "他2名" past FOLDER_MAX_NAMES.
+export function peopleLabel(names: string[], lang: 'ja' | 'en'): string {
+  const shown = names.slice(0, FOLDER_MAX_NAMES);
+  const rest = names.length - shown.length;
+  const list = shown.join(lang === 'ja' ? '、' : ', ');
+  if (rest <= 0) return list;
+  return lang === 'ja' ? `${list} 他${rest}名` : `${list} +${rest}`;
+}
+
+// Folder name for one meeting, e.g. "2026-11-14 1430 Meeting room A (Alice, Bob)".
+export function folderName(m: MeetingRecord, o: { tz: string; lang: 'ja' | 'en' }): string {
+  const people = m.participants.length ? m.participants : [m.callerName];
+  const when = `${dateOf(m.startedAt, o.tz)} ${timeOf(m.startedAt, o.tz).replace(':', '')}`;
+  const name = [when, m.roomName, `(${peopleLabel(people, o.lang)})`].filter(Boolean).join(' ');
   // Keep it a safe file name for local delivery as well.
   return name.replace(/[/\\:*?"<>|]/g, '_').trim();
 }
@@ -66,6 +80,7 @@ const LABELS = {
     video: '録画',
     transcript: '文字起こし',
     none: '（なし）',
+    sep: '、',
   },
   en: {
     title: 'Meeting notes',
@@ -78,6 +93,7 @@ const LABELS = {
     video: 'Recording',
     transcript: 'Transcript',
     none: '(none)',
+    sep: ', ',
   },
 } as const;
 
@@ -96,7 +112,7 @@ export function summaryDocText(
     `${L.when}: ${when}`,
     ...(m.roomName ? [`${L.room}: ${m.roomName}`] : []),
     `${L.caller}: ${m.callerName}`,
-    `${L.people}: ${m.participants.join(', ') || L.none}`,
+    `${L.people}: ${m.participants.join(L.sep) || L.none}`,
     '',
     `■ ${L.highlights}`,
     ...(s.highlights.length ? s.highlights.map((h) => `・${h}`) : [L.none]),
@@ -120,7 +136,7 @@ export function notificationText(
 ): string {
   const when = `${dateOf(m.startedAt, opts.tz)} ${timeOf(m.startedAt, opts.tz)}–${timeOf(m.endedAt, opts.tz)}`;
   const head = [when, m.roomName].filter(Boolean).join(' ');
-  const people = m.participants.length ? ` (${m.participants.join(', ')})` : '';
+  const people = m.participants.length ? ` (${m.participants.join(LABELS[opts.lang].sep)})` : '';
   const text = [`${head}${people}`, ...s.highlights.map((h) => `・${h}`)].join('\n');
   // Keep the email note short; the full summary is in the folder.
   return text.length > 900 ? `${text.slice(0, 897)}...` : text;
