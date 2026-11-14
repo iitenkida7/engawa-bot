@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: test (bun via Docker)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # The same Docker-based Makefile targets developers run locally.
+      - name: Build image
+        run: make build
+
+      - name: Install dependencies
+        run: make install
+
+      - name: Type-check
+        run: make typecheck
+
+      - name: Lint (Biome)
+        run: make lint
+
+      - name: Test
+        run: make test

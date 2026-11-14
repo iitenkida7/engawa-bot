@@ -1,0 +1,27 @@
+services:
+  bot:
+    build: .
+    image: engawa-bot
+    env_file:
+      - path: .env
+        required: false
+    volumes:
+      # recipients.json and the Google service account key (read-only).
+      - ./config:/app/config:ro
+      # Recordings waiting for upload, and meetings kept locally.
+      - ./data:/app/data
+    shm_size: 1gb
+    restart: unless-stopped
+
+  # Development tasks (lint / test / typecheck) with the source mounted.
+  dev:
+    build: .
+    image: engawa-bot
+    profiles: [dev]
+    working_dir: /app
+    volumes:
+      - .:/app
+      - node_modules:/app/node_modules
+
+volumes:
+  node_modules:
