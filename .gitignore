@@ -1,0 +1,16 @@
+# Claude Code local settings and worktrees
+.claude/
+
+# Dependencies
+node_modules/
+
+# Local config — never commit secrets
+.env
+config/*.json
+!config/*.example.json
+
+# Runtime output (recordings waiting for upload)
+data/
+
+# macOS
+.DS_Store
