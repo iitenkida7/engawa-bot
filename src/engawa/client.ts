@@ -6,6 +6,12 @@
 
 import { readdir, stat } from 'node:fs/promises';
 import { join } from 'node:path';
+import {
+  MAX_PROFILE_IMAGE_LEN,
+  OUTFIT_KEY,
+  PROFILE_IMAGE_KEY,
+  thumbnailScript,
+} from '@/engawa/look';
 import { parseInFrame, parseOutFrame } from '@/engawa/protocol';
 import { type Point, World, type WorldEvent } from '@/engawa/world';
 import { log } from '@/log';
@@ -41,6 +47,8 @@ export class EngawaClient {
       groqApiKey: string;
       downloadDir: string;
       chromeFlags?: string[];
+      // Profile picture source (any image data URL) and avatar outfit.
+      look: { image: string; outfit: Record<string, number> };
       onEvent: (e: WorldEvent) => void;
     },
   ) {}
@@ -100,6 +108,7 @@ export class EngawaClient {
     await v.evaluate(
       `localStorage.setItem(${JSON.stringify(GROQ_KEY_STORAGE)}, ${JSON.stringify(this.opts.groqApiKey)})`,
     );
+    await this.seedLook();
     await v.reload();
     if (await this.visible('#join-pass-form')) {
       if (!this.opts.password)
@@ -127,6 +136,28 @@ export class EngawaClient {
       s.textContent = '#self-preview { display: none !important; }';
       document.head.appendChild(s);
     })()`);
+  }
+
+  // Store the bot's profile picture and outfit where engawa keeps the user's
+  // own, so the client picks them up on join.
+  private async seedLook(): Promise<void> {
+    const v = this.v;
+    const { image, outfit } = this.opts.look;
+    try {
+      const png = await v.evaluate<string>(thumbnailScript(image));
+      if (png.length <= MAX_PROFILE_IMAGE_LEN) {
+        await v.evaluate(
+          `localStorage.setItem(${JSON.stringify(PROFILE_IMAGE_KEY)}, ${JSON.stringify(png)})`,
+        );
+      } else {
+        log.warn('the bot avatar image is too large for engawa; skipping it');
+      }
+    } catch (err) {
+      log.warn(`could not set the bot avatar image: ${String(err)}`);
+    }
+    await v.evaluate(
+      `localStorage.setItem(${JSON.stringify(OUTFIT_KEY)}, ${JSON.stringify(JSON.stringify(outfit))})`,
+    );
   }
 
   // The bot must never send audio or video of its own. Called every tick: the

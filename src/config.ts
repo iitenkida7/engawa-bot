@@ -2,6 +2,7 @@
 // rules are unit-testable; main.ts passes in process.env.
 
 import { tileCenter } from '@/bot/stroll';
+import { parseOutfit } from '@/engawa/look';
 import type { Point } from '@/engawa/world';
 
 export type Delivery = 'local' | 'drive';
@@ -25,6 +26,10 @@ export type Config = {
   dataDir: string;
   // Extra Chrome switches (e.g. --no-sandbox inside Docker).
   chromeFlags: string[];
+  // The bot's look: a profile picture file (null = the built-in robot) and an
+  // avatar outfit (null = the built-in one).
+  avatarImageFile: string | null;
+  outfit: Record<string, number> | null;
   // Google Drive (delivery = drive).
   serviceAccountFile: string;
   driveFolderId: string | null;
@@ -104,6 +109,12 @@ export function parseConfig(env: Env): Config {
   if (delivery === 'drive' && !driveFolderId)
     errors.push('DRIVE_FOLDER_ID is required when DELIVERY=drive');
 
+  const outfitRaw = str(env, 'BOT_OUTFIT');
+  const outfit = outfitRaw === null ? null : parseOutfit(outfitRaw);
+  if (outfitRaw !== null && outfit === null) {
+    errors.push('BOT_OUTFIT must be a JSON object of non-negative integers');
+  }
+
   const allowedEmailDomains = (str(env, 'ALLOWED_EMAIL_DOMAINS') ?? '')
     .split(',')
     .map((d) => d.trim().toLowerCase().replace(/^@/, ''))
@@ -128,6 +139,8 @@ export function parseConfig(env: Env): Config {
     delivery: delivery as Delivery,
     dataDir: str(env, 'DATA_DIR') ?? './data',
     chromeFlags: (str(env, 'CHROME_FLAGS') ?? '').split(/\s+/).filter(Boolean),
+    avatarImageFile: str(env, 'BOT_AVATAR_IMAGE'),
+    outfit,
     serviceAccountFile: str(env, 'GOOGLE_SERVICE_ACCOUNT_FILE') ?? './config/service-account.json',
     driveFolderId,
     recipientsFile: str(env, 'RECIPIENTS_FILE') ?? './config/recipients.json',

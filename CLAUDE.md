@@ -31,6 +31,7 @@ engawa-bot は [engawa](https://github.com/iitenkida7/engawa)（ブラウザだ�
 - `engawa/world.ts` — 通信内容から組み立てる「いまの状況」（自分の位置・通話グループ・文字起こしなど。I/O なし）。
 - `engawa/client.ts` — Bun.WebView で engawa を操作する層（入室・ノック応答・歩く・録画/文字起こしボタン・ダウンロード）。
 - `engawa/map.ts` — `/api/map` から部屋名を引く。
+- `engawa/look.ts` — bot の見た目（ロボットのプロフィール画像・固定のアバター）。engawa の localStorage に入れて反映する。
 - `bot/session.ts` — 会議の状態遷移（idle → heading → meeting）。副作用はアクションとして返す純粋関数。
 - `bot/stroll.ts` — 散歩先の選び方（純粋）。
 - `bot/bot.ts` — メインループ。イベントを状態遷移に流し、アクションを実行する。

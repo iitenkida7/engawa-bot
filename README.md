@@ -32,6 +32,10 @@ on from the client's own WebSocket traffic.
 
 While busy, it answers other knocks with "later" (one meeting at a time).
 
+It is easy to spot: a robot face as its profile picture (on its camera-off tile, in the roster and by
+its name on the map) and a fixed avatar with a hat and glasses. Swap them with `BOT_AVATAR_IMAGE` and
+`BOT_OUTFIT`. It never sends audio or video of its own, and its own tile is kept out of the recording.
+
 ## Setup
 
 Requirements: Docker (with Compose) on a machine that can reach your engawa. A small box is enough:

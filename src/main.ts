@@ -11,6 +11,7 @@ import { Drive } from '@/deliver/drive';
 import { GoogleAuth, parseServiceAccount } from '@/deliver/google-auth';
 import { parseRecipients, type Recipients } from '@/deliver/recipients';
 import { EngawaClient } from '@/engawa/client';
+import { DEFAULT_OUTFIT, fileDataUrl, ROBOT_SVG, svgDataUrl } from '@/engawa/look';
 import { log } from '@/log';
 import type { MeetingRecord } from '@/meeting/record';
 import { summarize } from '@/meeting/summarize';
@@ -69,6 +70,14 @@ async function main(): Promise<void> {
     log.info(`meeting saved to ${dir}`);
   };
 
+  let avatarImage = svgDataUrl(ROBOT_SVG);
+  if (config.avatarImageFile) {
+    const bytes = await Bun.file(config.avatarImageFile).bytes();
+    const url = fileDataUrl(config.avatarImageFile, bytes);
+    if (!url) throw new ConfigError(`BOT_AVATAR_IMAGE must be a png, jpg, webp, gif or svg file`);
+    avatarImage = url;
+  }
+
   let bot: Bot | null = null;
   const client = new EngawaClient({
     url: config.engawaUrl,
@@ -77,6 +86,7 @@ async function main(): Promise<void> {
     groqApiKey: config.groqApiKey,
     downloadDir: downloads,
     chromeFlags: config.chromeFlags,
+    look: { image: avatarImage, outfit: { ...DEFAULT_OUTFIT, ...config.outfit } },
     onEvent: (e) => bot?.onWorldEvent(e),
   });
   bot = new Bot(client, {

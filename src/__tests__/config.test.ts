@@ -72,3 +72,18 @@ describe('parsePoints', () => {
     expect(parsePoints('1;2')).toBeNull();
   });
 });
+
+describe('look settings', () => {
+  const base = { ENGAWA_URL: 'https://engawa.example.com/', GROQ_API_KEY: 'gsk_x' };
+
+  it('reads BOT_OUTFIT and BOT_AVATAR_IMAGE', () => {
+    const c = parseConfig({ ...base, BOT_OUTFIT: '{"hat":2}', BOT_AVATAR_IMAGE: './me.png' });
+    expect(c.outfit).toEqual({ hat: 2 });
+    expect(c.avatarImageFile).toBe('./me.png');
+    expect(parseConfig(base).outfit).toBeNull();
+  });
+
+  it('rejects a malformed BOT_OUTFIT', () => {
+    expect(() => parseConfig({ ...base, BOT_OUTFIT: '{"hat":"x"}' })).toThrow(ConfigError);
+  });
+});
